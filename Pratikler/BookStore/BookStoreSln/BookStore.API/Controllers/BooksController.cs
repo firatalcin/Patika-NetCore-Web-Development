@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using BookStore.API.DBOperations;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BookStore.API.Controllers
@@ -7,60 +8,24 @@ namespace BookStore.API.Controllers
     [ApiController]
     public class BooksController : ControllerBase
     {
-        private static List<Book> books = new List<Book>(){
-            new Book
-            {
-                Id = 1,
-                Title = "1984",
-                GenreId = 1, // Örn: 1 = Bilim Kurgu
-                PageCount = 328,
-                PublishDate = new DateTime(1949, 6, 8)
-            },
-            new Book
-            {
-                Id = 2,
-                Title = "Savaş ve Barış",
-                GenreId = 2, // Örn: 2 = Tarihsel Roman
-                PageCount = 1225,
-                PublishDate = new DateTime(1869, 1, 1)
-            },
-            new Book
-            {
-                Id = 3,
-                Title = "Küçük Prens",
-                GenreId = 3, // Örn: 3 = Çocuk Kitabı
-                PageCount = 96,
-                PublishDate = new DateTime(1943, 4, 6)
-            },
-            new Book
-            {
-                Id = 4,
-                Title = "Yüzüklerin Efendisi",
-                GenreId = 4, // Örn: 4 = Fantastik
-                PageCount = 1178,
-                PublishDate = new DateTime(1954, 7, 29)
-            },
-            new Book
-            {
-                Id = 5,
-                Title = "Suç ve Ceza",
-                GenreId = 5, // Örn: 5 = Klasik
-                PageCount = 671,
-                PublishDate = new DateTime(1866, 1, 1)
-            }
-        };
+        private readonly BookStoreDbContext _context;
+
+        public BooksController(BookStoreDbContext context)
+        {
+            _context = context;
+        }
 
         [HttpGet]
         public List<Book> GetBooks()
         {
-            var bookList = books.OrderBy(x => x.Id).ToList();
+            var bookList = _context.Books.OrderBy(x => x.Id).ToList();
             return bookList;
         }
 
         [HttpGet("{id}")]
         public Book GetById(int id)
         {
-            var book = books.Where(x => x.Id == id).FirstOrDefault();
+            var book = _context.Books.Where(x => x.Id == id).FirstOrDefault();
 
             if (book == null)
             {
@@ -75,21 +40,22 @@ namespace BookStore.API.Controllers
         [HttpPost]
         public IActionResult AddBook([FromBody] Book newBook)
         {
-            var book = books.SingleOrDefault(x => x.Title == newBook.Title);
+            var book = _context.Books.SingleOrDefault(x => x.Title == newBook.Title);
 
             if(book is not null)
             {
                 return BadRequest();
             }
 
-            books.Add(newBook);
+            _context.Books.Add(newBook);
+            _context.SaveChanges();
             return Ok();
         }
 
         [HttpPut("{id}")]
         public IActionResult UpdateBook(int id, [FromBody] Book updatedBook)
         {
-            var book = books.SingleOrDefault(x => x.Id == id);
+            var book = _context.Books.SingleOrDefault(x => x.Id == id);
 
             if (book is null)
             {
@@ -101,20 +67,23 @@ namespace BookStore.API.Controllers
             book.GenreId = updatedBook.GenreId != default ? updatedBook.GenreId : book.GenreId;
             book.PageCount = updatedBook.PageCount != default ? updatedBook.PageCount : book.PageCount;
 
+            _context.SaveChanges();
+
             return Ok();
         }
 
         [HttpDelete("{id}")]
         public IActionResult DeleteBook(int id) 
         {
-            var book = books.SingleOrDefault( x => x.Id == id);
+            var book = _context.Books.SingleOrDefault( x => x.Id == id);
 
             if(book is null)
             {
                 return NotFound();
             }
 
-            books.Remove(book);
+            _context.Books.Remove(book);
+            _context.SaveChanges();
             return Ok();
         }
     }
