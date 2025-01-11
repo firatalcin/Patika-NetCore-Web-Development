@@ -1,10 +1,10 @@
-﻿using BookStore.API.BookOperations.CreateBook;
+﻿using AutoMapper;
+using BookStore.API.BookOperations.CreateBook;
 using BookStore.API.BookOperations.DeleteBook;
 using BookStore.API.BookOperations.GetBook;
 using BookStore.API.BookOperations.GetBooks;
 using BookStore.API.BookOperations.UpdateBook;
 using BookStore.API.DBOperations;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BookStore.API.Controllers
@@ -14,10 +14,12 @@ namespace BookStore.API.Controllers
     public class BooksController : ControllerBase
     {
         private readonly BookStoreDbContext _context;
+        private readonly IMapper _mapper;
 
-        public BooksController(BookStoreDbContext context)
+        public BooksController(BookStoreDbContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
         [HttpGet]
@@ -40,7 +42,7 @@ namespace BookStore.API.Controllers
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
-            }                   
+            }
         }
 
         [HttpPost]
@@ -49,7 +51,7 @@ namespace BookStore.API.Controllers
             try
             {
                 CreateBookCommand createBookCommand = new CreateBookCommand(_context);
-                createBookCommand.Handle(newBook);
+                createBookCommand.Handle(newBook, _mapper);
             }
             catch (Exception ex)
             {
@@ -73,7 +75,7 @@ namespace BookStore.API.Controllers
                 return BadRequest(ex.Message);
             }
 
-           return Ok();
+            return Ok();
         }
 
         [HttpDelete("{id}")]
