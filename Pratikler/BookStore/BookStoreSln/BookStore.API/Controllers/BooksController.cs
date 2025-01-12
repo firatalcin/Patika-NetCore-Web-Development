@@ -5,6 +5,8 @@ using BookStore.API.BookOperations.GetBook;
 using BookStore.API.BookOperations.GetBooks;
 using BookStore.API.BookOperations.UpdateBook;
 using BookStore.API.DBOperations;
+using FluentValidation;
+using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BookStore.API.Controllers
@@ -51,6 +53,22 @@ namespace BookStore.API.Controllers
             try
             {
                 CreateBookCommand createBookCommand = new CreateBookCommand(_context);
+                CreateBookCommandValidator validation = new CreateBookCommandValidator();
+
+                validation.ValidateAndThrow(newBook);
+
+                //if (!result.IsValid)
+                //{
+                //    foreach (var item in result.Errors)
+                //    {
+                //        Console.WriteLine("Özellik " + item.PropertyName + " - Error Message: " + item.ErrorMessage);
+                //    }
+                //}
+                //else
+                //{
+                //    createBookCommand.Handle(newBook, _mapper);
+                //}
+                //
                 createBookCommand.Handle(newBook, _mapper);
             }
             catch (Exception ex)
