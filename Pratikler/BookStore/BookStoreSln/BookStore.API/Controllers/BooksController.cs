@@ -55,20 +55,7 @@ namespace BookStore.API.Controllers
                 CreateBookCommand createBookCommand = new CreateBookCommand(_context);
                 CreateBookCommandValidator validation = new CreateBookCommandValidator();
 
-                validation.ValidateAndThrow(newBook);
-
-                //if (!result.IsValid)
-                //{
-                //    foreach (var item in result.Errors)
-                //    {
-                //        Console.WriteLine("Özellik " + item.PropertyName + " - Error Message: " + item.ErrorMessage);
-                //    }
-                //}
-                //else
-                //{
-                //    createBookCommand.Handle(newBook, _mapper);
-                //}
-                //
+                validation.ValidateAndThrow(newBook);                
                 createBookCommand.Handle(newBook, _mapper);
             }
             catch (Exception ex)
@@ -85,6 +72,8 @@ namespace BookStore.API.Controllers
             try
             {
                 UpdateBookCommand updateBookCommand = new UpdateBookCommand(_context);
+                UpdateBookCommandValidator validation = new UpdateBookCommandValidator();
+                validation.ValidateAndThrow(updatedBook);
                 updateBookCommand.Handle(id, updatedBook);
             }
             catch (Exception ex)
